@@ -1,4 +1,4 @@
-# 🚀 Talos Toolbx
+# 🚀 Talos Toolbox
 
 A zero-latency, privileged debug environment for **Talos Linux** nodes, fully integrated with **Sidero Omni**.
 
