@@ -26,6 +26,8 @@ ARG HELM_DIFF_VERSION=v3.15.15
 ARG FLUX_VERSION=v2.9.6
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
 ARG KUBE_OVN_VERSION=v1.16.15
+# renovate: datasource=github-releases depName=cilium/cilium-cli
+ARG CILIUM_CLI_VERSION=v0.20.1
 
 # Provided by buildkit, the default keeps classic `docker build` working
 ARG TARGETARCH=amd64
@@ -53,12 +55,13 @@ RUN curl -fsSL "https://github.com/siderolabs/talos/releases/download/${TALOSCTL
     && curl -fsSL "https://github.com/helmfile/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION#v}_linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin helmfile \
     && curl -fsSL "https://github.com/fluxcd/flux2/releases/download/${FLUX_VERSION}/flux_${FLUX_VERSION#v}_linux_${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin flux \
     && curl -fsSL "https://raw.githubusercontent.com/kubeovn/kube-ovn/${KUBE_OVN_VERSION}/dist/images/kubectl-ko" -o /usr/local/bin/kubectl-ko \
+    && curl -fsSL "https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin cilium \
     && mkdir -p /root/.local/share/helm/plugins \
     && curl -fsSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/diff-${HELM_DIFF_VERSION#v}-linux-${TARGETARCH}.tgz" | tar xz -C /root/.local/share/helm/plugins \
     && chmod +x /usr/local/bin/talosctl /usr/local/bin/kubectl /usr/local/bin/omnictl \
         /usr/local/bin/kubectx /usr/local/bin/kubens /usr/local/bin/helm \
         /usr/local/bin/k9s /usr/local/bin/kubectl-oidc_login /usr/local/bin/topf \
-        /usr/local/bin/helmfile /usr/local/bin/flux /usr/local/bin/kubectl-ko \
+        /usr/local/bin/helmfile /usr/local/bin/flux /usr/local/bin/kubectl-ko /usr/local/bin/cilium \
     && rm -rf /tmp/kubelogin.zip "/tmp/linux-${TARGETARCH}"
 
 # No apk package exists for openstackclient (not even in edge); pin the pip install so renovate tracks it

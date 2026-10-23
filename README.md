@@ -11,7 +11,7 @@ Since Talos Linux is designed to be immutable, API-driven, and lacks a tradition
 - **Pre-installed Tooling:** 
   - *Network:* `tcpdump`, `tshark`, `nmap`, `socat`, `iperf3`, `mtr`, `iproute2`, `bind-tools`
   - *Storage:* `lvm2`, `e2fsprogs`, `xfsprogs`, `parted`, `drbd-utils`, `nvme-cli`
-  - *K8s/Talos:* `kubectl`, `talosctl`, `omnictl`, `helm` (with the `helm diff` plugin), `helmfile`, `flux`, `cri-tools`, `topf`, `kubectl-ko` (`kubectl ko` for Kube-OVN clusters)
+  - *K8s/Talos:* `kubectl`, `talosctl`, `omnictl`, `helm` (with the `helm diff` plugin), `helmfile`, `flux`, `cilium` (cilium-cli), `cri-tools`, `topf`, `kubectl-ko` (`kubectl ko` for Kube-OVN clusters)
   - *Cloud:* `aws-cli`, `openstack` (python-openstackclient)
   - *Utilities:* `jq`, `yq`, `vim`, `tmux`, `lsof`, `strace`, `coreutils`
 - **Chad UX:** Custom `.bashrc` with smart aliases, drbd wrappers, and full auto-completion for `kubectl`, `talosctl`, `omnictl` and many others.
