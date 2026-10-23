@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-# kubectl-talos_toolbx: The Gigachad Debugger for Talos nodes via Sidero Omni
+# kubectl-talos_toolbox: The Gigachad Debugger for Talos nodes via Sidero Omni
 # ==============================================================================
 
 NODE=$1
@@ -9,13 +9,23 @@ NODE=$1
 # Argument Check
 if [ -z "$NODE" ]; then
   echo -e "\033[0;31m❌ Error: You must specify the node name!\033[0m"
-  echo "Usage: kubectl talos-toolbx <node-name>"
+  echo "Usage: kubectl talos-toolbox <node-name>"
   exit 1
 fi
 
+# Image + tag lookup: single source of truth for the repo
+REPO="next-siderolabs/talos-toolbox"
+
 # Global configuration path (Standard Linux XDG)
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/talos-toolbx"
+CONFIG_BASE="${XDG_CONFIG_HOME:-$HOME/.config}"
+CONFIG_DIR="$CONFIG_BASE/talos-toolbox"
 CONFIG_FILE="$CONFIG_DIR/config.env"
+
+# shortcut: keep old installs working; drop this fallback once no talos-toolbx dirs exist
+LEGACY_CONFIG_FILE="$CONFIG_BASE/talos-toolbx/config.env"
+if [ ! -f "$CONFIG_FILE" ] && [ -f "$LEGACY_CONFIG_FILE" ]; then
+  CONFIG_FILE="$LEGACY_CONFIG_FILE"
+fi
 
 # If config doesn't exist, create an empty template and warn the user
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -25,7 +35,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   
   mkdir -p "$CONFIG_DIR"
   cat <<EOF > "$CONFIG_FILE"
-# Configuration for kubectl talos-toolbx
+# Configuration for kubectl talos-toolbox
 OMNI_ENDPOINT="https://<your-omni-account>.siderolabs.io"
 OMNI_SERVICE_ACCOUNT_KEY="insert-your-sa-key-here"
 OMNI_CLUSTER_NAME="your-cluster-name-on-omni"
@@ -40,7 +50,7 @@ echo -e "\033[0;36m🚀 Launching Talos Toolbx on node/$NODE via Omni...\033[0m"
 
 # Fetch the latest commit hash from GitHub API to use as the image tag
 echo -e "\033[0;33m🔍 Resolving latest image hash from GitHub...\033[0m"
-LATEST_SHA=$(curl -s "https://api.github.com/repos/cappyt/talos-toolbx/commits/master" | grep -m 1 '"sha":' | cut -d '"' -f 4 | cut -c1-7)
+LATEST_SHA=$(curl -s "https://api.github.com/repos/$REPO/commits/main" | grep -m 1 '"sha":' | cut -d '"' -f 4 | cut -c1-7)
 
 if [ -n "$LATEST_SHA" ]; then
   IMAGE_TAG="sha-$LATEST_SHA"
@@ -55,7 +65,7 @@ fi
 kubectl debug node/$NODE -it \
   --namespace kube-system \
   --profile=sysadmin \
-  --image="ghcr.io/cappyt/talos-toolbx:$IMAGE_TAG" \
+  --image="ghcr.io/$REPO:$IMAGE_TAG" \
   --image-pull-policy='Always' \
   --env="OMNI_ENDPOINT=$OMNI_ENDPOINT" \
   --env="OMNI_SERVICE_ACCOUNT_KEY=$OMNI_SERVICE_ACCOUNT_KEY" \

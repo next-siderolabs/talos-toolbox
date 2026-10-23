@@ -11,8 +11,8 @@ Since Talos Linux is designed to be immutable, API-driven, and lacks a tradition
 - **Pre-installed Tooling:** 
   - *Network:* `tcpdump`, `tshark`, `nmap`, `socat`, `iperf3`, `mtr`, `iproute2`, `bind-tools`
   - *Storage:* `lvm2`, `e2fsprogs`, `xfsprogs`, `parted`, `drbd-utils`, `nvme-cli`
-  - *K8s/Talos:* `kubectl`, `talosctl`, `omnictl`, `helm`, `cri-tools`
-  - *Cloud:* `aws-cli`
+  - *K8s/Talos:* `kubectl`, `talosctl`, `omnictl`, `helm` (with the `helm diff` plugin), `helmfile`, `flux`, `cri-tools`, `topf`, `kubectl-ko` (`kubectl ko` for Kube-OVN clusters)
+  - *Cloud:* `aws-cli`, `openstack` (python-openstackclient)
   - *Utilities:* `jq`, `yq`, `vim`, `tmux`, `lsof`, `strace`, `coreutils`
 - **Chad UX:** Custom `.bashrc` with smart aliases, drbd wrappers, and full auto-completion for `kubectl`, `talosctl`, `omnictl` and many others.
 
@@ -23,32 +23,32 @@ Currently, the plugin can be installed locally by placing the executable script 
 1. Clone the repository or download the script:
   
   ```
-  git clone https://github.com/cappyt/talos-toolbx.git
-  cd talos-toolbx
+  git clone https://github.com/next-siderolabs/talos-toolbox.git
+  cd talos-toolbox
   ```
 2. Make the script executable:
   
   ```
-  chmod +x kubectl-talos_toolbx
+  chmod +x kubectl-talos_toolbox
   ```
 3. Move it to your local binary path (ensure `~/.local/bin` is in your `$PATH`):
   
   ```
   mkdir -p ~/.local/bin
-  cp kubectl-talos_toolbx ~/.local/bin/
+  cp kubectl-talos_toolbox ~/.local/bin/
   ```
 4. Verify the installation:
   
   ```
   kubectl plugin list
-  # You should see "kubectl-talos_toolbx" in the output
+  # You should see "kubectl-talos_toolbox" in the output
   ```
 
 ## ⚙️ Configuration (Sidero Omni)
 
 The tool requires authentication with Sidero Omni to seamlessly generate your K8s and Talos credentials from inside the debug pod.
 
-The first time you run the tool, it will generate a configuration template at `~/.config/talos-toolbx/config.env` and exit.
+The first time you run the tool, it will generate a configuration template at `~/.config/talos-toolbox/config.env` and exit.
 
 Open the file and fill in your details:
 
@@ -65,7 +65,7 @@ OMNI_CLUSTER_NAME="your-cluster-name-on-omni"
 To start a debug session, simply run the plugin and specify the target node:
 
 ```
-kubectl talos-toolbx <node-name>
+kubectl talos-toolbox <node-name>
 ```
 
 ### Inside the Pod

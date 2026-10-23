@@ -113,7 +113,7 @@ get-kubeconfig() {
     
     rm -f ~/.kube/config
     
-    omnictl kubeconfig --service-account -c "$OMNI_CLUSTER_NAME" --user "talos-toolbx-admin" ~/.kube/config
+    omnictl kubeconfig --service-account -c "$OMNI_CLUSTER_NAME" --user "talos-toolbox-admin" ~/.kube/config
     
     if [ -f ~/.kube/config ]; then
         echo -e "${GREEN}✅ kubectl is now connected via native Service Account token!${NC}"
