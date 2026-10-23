@@ -1,4 +1,4 @@
-name: Build and Push Talos Toolbx
+name: Build and Push Talos Toolbox
 
 on:
   # Every push to the default branch, so the sha-<commit> tag the plugin
