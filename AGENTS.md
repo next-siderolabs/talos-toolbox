@@ -39,10 +39,10 @@ clone URL. The plugin's API query follows `main` only, even though CI also trigg
 `master`. If the repo is renamed or the default branch changes, update the script's
 `REPO`, and the README (CI follows the repo automatically).
 
-The `Toolbx` branding (bashrc banner, prompt, launch messages) is intentional style,
-not a name to unify. The config dir is `talos-toolbox` now; the script keeps a legacy
-`talos-toolbx` fallback (marked with a `shortcut:` comment) — don't remove it until no
-old installs exist.
+Branding in `bashrc` is unified to `Toolbox`; remaining `Toolbx` strings (the script's
+launch message, the CI workflow title) are cosmetic only. The config dir is `talos-toolbox`
+now; the script keeps a legacy `talos-toolbx` fallback (marked with a `shortcut:`
+comment) — don't remove it until no old installs exist.
 
 ## Adding tools to the image
 
