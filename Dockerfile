@@ -63,13 +63,14 @@ RUN curl -fsSL "https://github.com/siderolabs/talos/releases/download/${TALOSCTL
     && curl -fsSL "https://github.com/getsops/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux.${TARGETARCH}" -o /usr/local/bin/sops \
     && mkdir -p /root/.local/share/helm/plugins \
     && curl -fsSL "https://github.com/databus23/helm-diff/releases/download/${HELM_DIFF_VERSION}/diff-${HELM_DIFF_VERSION#v}-linux-${TARGETARCH}.tgz" | tar xz -C /root/.local/share/helm/plugins \
-    && curl -fsSL "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-${TARGETARCH}.tar.gz" | tar xz -C /usr/local/bin age age-keygen \
+    && curl -fsSL "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-${TARGETARCH}.tar.gz" | tar xz -C /tmp age/age age/age-keygen \
+    && mv /tmp/age/age /tmp/age/age-keygen /usr/local/bin \
     && chmod +x /usr/local/bin/talosctl /usr/local/bin/kubectl /usr/local/bin/omnictl \
         /usr/local/bin/kubectx /usr/local/bin/kubens /usr/local/bin/helm \
         /usr/local/bin/k9s /usr/local/bin/kubectl-oidc_login /usr/local/bin/topf \
         /usr/local/bin/helmfile /usr/local/bin/flux /usr/local/bin/kubectl-ko /usr/local/bin/cilium \
         /usr/local/bin/sops /usr/local/bin/age /usr/local/bin/age-keygen \
-    && rm -rf /tmp/kubelogin.zip "/tmp/linux-${TARGETARCH}"
+    && rm -rf /tmp/kubelogin.zip /tmp/age "/tmp/linux-${TARGETARCH}"
 
 # No apk package exists for openstackclient (not even in edge); pin the pip install so renovate tracks it
 RUN python3 -m pip install --no-cache-dir --break-system-packages \
