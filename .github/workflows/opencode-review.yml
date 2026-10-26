@@ -1,0 +1,74 @@
+
+name: OpenCode Local PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: opencode-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Verify Strata endpoint
+        env:
+          STRATA_BASE_URL: ${{ vars.STRATA_BASE_URL }}
+          STRATA_API_KEY: ${{ secrets.STRATA_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${STRATA_BASE_URL:?Set repository variable STRATA_BASE_URL}"
+          : "${STRATA_API_KEY:?Set repository secret STRATA_API_KEY}"
+
+          curl --fail --silent --show-error \
+            --max-time 15 \
+            -H "Authorization: Bearer ${STRATA_API_KEY}" \
+            "${STRATA_BASE_URL%/}/models" \
+            -o /dev/null
+
+      - name: Run OpenCode PR review
+        uses: anomalyco/opencode/github@latest
+        env:
+          STRATA_BASE_URL: ${{ vars.STRATA_BASE_URL }}
+          STRATA_API_KEY: ${{ secrets.STRATA_API_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          model: strata/qwen3.8-flash-next-iq3_xxs
+          use_github_token: true
+          share: false
+          prompt: |
+            Review this pull request using the repository context and PR diff.
+
+            Focus on:
+            - Correctness bugs and regressions
+            - Security vulnerabilities
+            - Race conditions and concurrency problems
+            - Error handling and edge cases
+            - Performance issues with meaningful impact
+            - Missing tests for important behavior
+
+            Rules:
+            - Report only actionable findings introduced by this PR.
+            - Explain the concrete failure scenario and its impact.
+            - Include the affected file and line when possible.
+            - Suggest a practical fix.
+            - Do not invent findings or report speculation as fact.
+            - Avoid style-only comments and duplicate findings.
+            - Do not modify files, commit changes, or push branches.
+            - Post review findings to this pull request.
