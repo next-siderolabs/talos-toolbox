@@ -1,7 +1,7 @@
 FROM alpine:3.24
 
 # renovate: datasource=github-releases depName=siderolabs/talos
-ARG TALOSCTL_VERSION=v1.14.4
+ARG TALOSCTL_VERSION=v1.14.5
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
 ARG KUBECTL_VERSION=v1.37.1
 # renovate: datasource=github-releases depName=helm/helm
@@ -15,7 +15,7 @@ ARG KUBECTX_VERSION=v0.11.0
 # renovate: datasource=github-releases depName=int128/kubelogin
 ARG KUBELOGIN_VERSION=v1.36.4
 # renovate: datasource=github-releases depName=postfinance/topf
-ARG TOPF_VERSION=v0.6.1
+ARG TOPF_VERSION=v0.6.2
 # renovate: datasource=pypi depName=python-openstackclient
 ARG OPENSTACKCLIENT_VERSION=10.5.0
 # renovate: datasource=github-releases depName=helmfile/helmfile
@@ -23,7 +23,7 @@ ARG HELMFILE_VERSION=v1.8.2
 # renovate: datasource=github-releases depName=databus23/helm-diff
 ARG HELM_DIFF_VERSION=v3.15.15
 # renovate: datasource=github-releases depName=fluxcd/flux2
-ARG FLUX_VERSION=v2.9.6
+ARG FLUX_VERSION=v2.10.0
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
 ARG KUBE_OVN_VERSION=v1.16.15
 # renovate: datasource=github-releases depName=cilium/cilium-cli
