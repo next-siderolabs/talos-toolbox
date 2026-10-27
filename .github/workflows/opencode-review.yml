@@ -1,9 +1,12 @@
+name: OpenCode PR Review
 
-name: OpenCode Local PR Review
-
+# On-demand review: a maintainer comments `/oc` or `/opencode` on a pull request
+# (conversation tab or an inline code comment) and the agent replies in the PR.
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -11,19 +14,28 @@ permissions:
   issues: write
 
 concurrency:
-  group: opencode-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: opencode-review-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
   review:
-    runs-on: self-hosted
+    # Only PR comments (issue_comment also fires on plain issues), only with a mention,
+    # and only from people with repo access: the agent runs on our self-hosted runner
+    # with the Strata key, so outside commenters must not be able to start it
+    if: |
+      (github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request) &&
+      (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on:
+      group: self-hosted-gh-runner-docker
+      labels: [self-hosted, Linux, X64]
     timeout-minutes: 30
 
     steps:
-      - name: Checkout pull request
+      - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
           persist-credentials: false
 
       - name: Verify Strata endpoint
@@ -42,33 +54,40 @@ jobs:
             "${STRATA_BASE_URL%/}/models" \
             -o /dev/null
 
-      - name: Run OpenCode PR review
+      - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           STRATA_BASE_URL: ${{ vars.STRATA_BASE_URL }}
           STRATA_API_KEY: ${{ secrets.STRATA_API_KEY }}
-          GITHUB_TOKEN: ${{ github.token }}
+          # Inline config has the highest precedence, so an opencode.json added by the
+          # PR under review cannot redirect the provider (and its key) elsewhere
+          OPENCODE_CONFIG_CONTENT: |
+            {
+              "$schema": "https://opencode.ai/config.json",
+              "provider": {
+                "strata": {
+                  "npm": "@ai-sdk/openai-compatible",
+                  "name": "Strata Local",
+                  "options": {
+                    "baseURL": "{env:STRATA_BASE_URL}",
+                    "apiKey": "{env:STRATA_API_KEY}",
+                    "timeout": 600000
+                  },
+                  "models": {
+                    "qwen3.8-flash-next-iq3_xxs": {
+                      "name": "Qwen3.8 Flash Next IQ3_XXS",
+                      "limit": {
+                        "context": 262144,
+                        "output": 8192
+                      }
+                    }
+                  }
+                }
+              },
+              "model": "strata/qwen3.8-flash-next-iq3_xxs"
+            }
         with:
           model: strata/qwen3.8-flash-next-iq3_xxs
           use_github_token: true
           share: false
-          prompt: |
-            Review this pull request using the repository context and PR diff.
-
-            Focus on:
-            - Correctness bugs and regressions
-            - Security vulnerabilities
-            - Race conditions and concurrency problems
-            - Error handling and edge cases
-            - Performance issues with meaningful impact
-            - Missing tests for important behavior
-
-            Rules:
-            - Report only actionable findings introduced by this PR.
-            - Explain the concrete failure scenario and its impact.
-            - Include the affected file and line when possible.
-            - Suggest a practical fix.
-            - Do not invent findings or report speculation as fact.
-            - Avoid style-only comments and duplicate findings.
-            - Do not modify files, commit changes, or push branches.
-            - Post review findings to this pull request.
