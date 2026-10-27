@@ -1,5 +1,8 @@
 FROM alpine:3.24
 
+# Test label for exercising the OpenCode PR review workflow
+LABEL io.talos-toolbox.test="opencode-review-test"
+
 # renovate: datasource=github-releases depName=siderolabs/talos
 ARG TALOSCTL_VERSION=v1.14.4
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
