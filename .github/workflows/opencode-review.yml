@@ -1,8 +1,11 @@
 name: OpenCode PR Review
 
-# On-demand review: a maintainer comments `/oc` or `/opencode` on a pull request
-# (conversation tab or an inline code comment) and the agent replies in the PR.
+# Automatic review on every PR into main/master, plus on-demand: a maintainer
+# comments `/oc` or `/opencode` on a pull request (conversation tab or an inline
+# code comment) and the agent replies in the PR.
 on:
+  pull_request:
+    branches: [ "main", "master" ]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -19,13 +22,19 @@ concurrency:
 
 jobs:
   review:
-    # Only PR comments (issue_comment also fires on plain issues), only with a mention,
-    # and only from people with repo access: the agent runs on our self-hosted runner
-    # with the Strata key, so outside commenters must not be able to start it
+    # Automatic for PRs from people with repo access; on-demand for `/oc` comments
+    # from the same people: the agent runs on our self-hosted runner with the Strata
+    # key, so outside-authored PRs and commenters must not be able to start it
     if: |
-      (github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request) &&
-      (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) &&
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      (
+        github.event_name == 'pull_request' &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+      ) ||
+      (
+        (github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request) &&
+        (contains(github.event.comment.body, '/oc') || contains(github.event.comment.body, '/opencode')) &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      )
     runs-on:
       group: self-hosted-gh-runner-docker
       labels: [self-hosted, Linux, X64]

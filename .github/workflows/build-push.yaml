@@ -28,8 +28,27 @@ jobs:
     permissions:
       contents: read
       packages: write
+      pull-requests: read
 
     steps:
+      # A push to main must be the merge of a PR whose OpenCode review check passed;
+      # cron rebuilds and manual dispatches have no PR and skip the check
+      - name: 🔍 Verify the merge was reviewed
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${{ github.repository }}"
+          pr=$(curl -fsSL -H "Authorization: Bearer ${{ github.token }}" \
+            "$api/commits/$GITHUB_SHA/pulls" | jq -r '.[0].number // empty')
+          [ -n "$pr" ] || { echo "::error::push to main must come from a merged PR"; exit 1; }
+          head=$(curl -fsSL -H "Authorization: Bearer ${{ github.token }}" \
+            "$api/pulls/$pr" | jq -r .head.sha)
+          curl -fsSL -H "Authorization: Bearer ${{ github.token }}" \
+            "$api/commits/$head/check-runs?per_page=100" |
+            jq -e '[.check_runs[] | select(.name == "review" and .conclusion == "success")] | length > 0' \
+            > /dev/null || { echo "::error::PR #${pr} has no passing OpenCode review check"; exit 1; }
+
       - name: 📥 Checkout repository
         uses: actions/checkout@v7
 
