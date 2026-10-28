@@ -2,11 +2,18 @@
 
 Shell-script + Dockerfile repo. There is no source code, test suite, linter, or local
 build tooling. Do not search for a test runner or lint config — they don't exist.
-CI (`.github/workflows/build-push.yaml`) only builds the container image: PR builds are
-build-only (no push), so a passing PR check means the image built. Pushes to `main` or
-`master` push to GHCR with tags `latest` + `YYYYMMDD` + `sha-<7chars>` (the date/latest
-tags are default-branch only). No platform matrix is configured, so published images
-are linux/amd64 only. A weekly cron rebuild keeps the apk packages fresh.
+CI reviews then builds: every PR into `main`/`master` gets an automatic OpenCode
+review (`.github/workflows/opencode-review.yml`, job `review`; also on-demand via
+`/oc` comments; automatic mode only fires for OWNER/MEMBER/COLLABORATOR authors) and
+a build-only check (`build-push.yaml`). `build-push.yaml` gates main pushes: its
+`Verify the merge was reviewed` step (push events only) fails the job unless the head
+commit came from a merged PR whose `review` check-run succeeded on the PR head SHA;
+cron and workflow_dispatch rebuilds skip the step. Blocking bad merges outright is a
+repo setting, not in the files: branch protection on `main` should require the
+`review` + build checks and restrict direct pushes. Pushes to `main` or `master` push
+to GHCR with tags `latest` + `YYYYMMDD` + `sha-<7chars>` (the date/latest tags are
+default-branch only). No platform matrix is configured, so published images are
+linux/amd64 only. A weekly cron rebuild keeps the apk packages fresh.
 
 ## The three pieces and how they're wired
 
