@@ -1,4 +1,4 @@
-FROM alpine:3.24
+FROM alpine:3.24.3
 
 # renovate: datasource=github-releases depName=siderolabs/talos
 ARG TALOSCTL_VERSION=v1.14.5
