@@ -22,13 +22,15 @@ concurrency:
 
 jobs:
   review:
-    # Automatic for PRs from people with repo access; on-demand for `/oc` comments
-    # from the same people: the agent runs on our self-hosted runner with the Strata
-    # key, so outside-authored PRs and commenters must not be able to start it
+    # Automatic for PRs from branches of this repo itself (only people with write
+    # access can create those); on-demand for `/oc` comments from people with repo
+    # access: the agent runs on our self-hosted runner with the Strata key, so fork
+    # PRs and outside commenters must not be able to start it. shortcut: fork PRs
+    # from collaborators still skip; upgrade if review-on-forks is ever wanted
     if: |
       (
         github.event_name == 'pull_request' &&
-        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+        github.event.pull_request.head.repo.full_name == github.repository
       ) ||
       (
         (github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request) &&
