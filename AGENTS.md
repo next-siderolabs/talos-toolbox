@@ -2,9 +2,10 @@
 
 Shell-script + Dockerfile repo. There is no source code, test suite, linter, or local
 build tooling. Do not search for a test runner or lint config — they don't exist.
-CI reviews then builds: every PR into `main`/`master` gets an automatic OpenCode
-review (`.github/workflows/opencode-review.yml`, job `review`; also on-demand via
-`/oc` comments; automatic mode only fires for OWNER/MEMBER/COLLABORATOR authors) and
+CI reviews then builds: every PR into `main`/`master` from a branch of this repo gets
+an automatic OpenCode review (`.github/workflows/opencode-review.yml`, job `review`;
+fork PRs and on-demand use `/oc` comments; the agent only starts for internal-branch
+PRs or OWNER/MEMBER/COLLABORATOR commenters) and
 a build-only check (`build-push.yaml`). `build-push.yaml` gates main pushes: its
 `Verify the merge was reviewed` step (push events only) fails the job unless the head
 commit came from a merged PR whose `review` check-run succeeded on the PR head SHA;
