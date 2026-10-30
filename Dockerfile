@@ -3,11 +3,11 @@ FROM alpine:3.24.3
 # renovate: datasource=github-releases depName=siderolabs/talos
 ARG TALOSCTL_VERSION=v1.14.5
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION=v1.37.1
+ARG KUBECTL_VERSION=v1.37.2
 # renovate: datasource=github-releases depName=helm/helm
 ARG HELM_VERSION=v4.3.1
 # renovate: datasource=github-releases depName=siderolabs/omni
-ARG OMNICTL_VERSION=v1.12.4
+ARG OMNICTL_VERSION=v1.13.0
 # renovate: datasource=github-releases depName=derailed/k9s
 ARG K9S_VERSION=v0.51.0
 # renovate: datasource=github-releases depName=ahmetb/kubectx
@@ -25,9 +25,9 @@ ARG HELM_DIFF_VERSION=v3.15.15
 # renovate: datasource=github-releases depName=fluxcd/flux2
 ARG FLUX_VERSION=v2.10.0
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
-ARG KUBE_OVN_VERSION=v1.16.15
+ARG KUBE_OVN_VERSION=v1.16.16
 # renovate: datasource=github-releases depName=cilium/cilium-cli
-ARG CILIUM_CLI_VERSION=v0.20.1
+ARG CILIUM_CLI_VERSION=v0.20.2
 # renovate: datasource=github-releases depName=getsops/sops
 ARG SOPS_VERSION=v3.13.3
 # renovate: datasource=github-releases depName=FiloSottile/age
