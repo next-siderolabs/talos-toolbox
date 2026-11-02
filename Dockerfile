@@ -25,7 +25,7 @@ ARG HELM_DIFF_VERSION=v3.15.15
 # renovate: datasource=github-releases depName=fluxcd/flux2
 ARG FLUX_VERSION=v2.10.0
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
-ARG KUBE_OVN_VERSION=v1.16.16
+ARG KUBE_OVN_VERSION=v1.16.17
 # renovate: datasource=github-releases depName=cilium/cilium-cli
 ARG CILIUM_CLI_VERSION=v0.20.2
 # renovate: datasource=github-releases depName=getsops/sops
