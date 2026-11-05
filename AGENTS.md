@@ -1,94 +1,61 @@
 # AGENTS.md
 
-Shell-script + Dockerfile repo. There is no source code, test suite, linter, or local
-build tooling. Do not search for a test runner or lint config — they don't exist.
-CI reviews then builds: every PR into `main`/`master` from a branch of this repo gets
-an automatic OpenCode review (`.github/workflows/opencode-review.yml`, job `review`;
-fork PRs and on-demand use `/oc` comments; the agent only starts for internal-branch
-PRs or OWNER/MEMBER/COLLABORATOR commenters;
-fork PRs from collaborators still skip — see the `shortcut:` comment in the
-workflow) and a build-only check (`build-push.yaml`). The `review` job runs on a
-**self-hosted** runner and injects its OpenCode config inline (repo variable
-`STRATA_BASE_URL`, secret `STRATA_API_KEY`), which overrides any committed config
-file. `build-push.yaml` gates main pushes: its
-`Verify the merge was reviewed` step (push events only) fails the job unless the head
-commit came from a merged PR whose `review` check-run succeeded on the PR head SHA;
-cron and workflow_dispatch rebuilds skip the step. Blocking bad merges outright is a
-repo setting, not in the files: branch protection on `main` should require the
-`review` + build checks and restrict direct pushes. Pushes to `main` or `master` push
-to GHCR with tags `latest` + `YYYYMMDD` + `sha-<7chars>` (the date/latest tags are
-default-branch only). No platform matrix is configured, so published images are
-linux/amd64 only. A weekly cron rebuild keeps the apk packages fresh.
+Operational notes for agents working in this repo. `talos-toolbox` is a Docker
+debug image for Talos nodes on Sidero Omni, plus a kubectl plugin that launches
+it. No test runner or lint config exists and none should be inferred — validate
+shell with `bash -n` and let the CI build be the release gate.
 
-## The three pieces and how they're wired
+## Repo layout
 
-- `kubectl-talos_toolbox` — a kubectl plugin. The filename MUST stay `kubectl-<name>`
-  (kubectl maps the command's dash onto the filename's underscore — verified with
-  kubectl 1.37: `kubectl foo-bar` executes `kubectl-foo_bar`), which makes the command
-  `kubectl talos-toolbox`. Client-side: reads
-  `${XDG_CONFIG_HOME:-~/.config}/talos-toolbox/config.env` (with a fallback to the legacy
-  `talos-toolbx` dir for old installs), exports its three `OMNI_*`
-  variables, and passes them as `--env` flags to
-  `kubectl debug node/<name> --profile=sysadmin` (which mounts the host root at `/host`).
-- `Dockerfile` + `bashrc` — the debug image. `bashrc` is COPYed to `/root/.bashrc`;
-  it defines `load-talos`/`load-kube` (which consume exactly those three `OMNI_*` env
-  vars — renaming one side requires editing both files), an EXIT trap that wipes
-  `~/.kube` and `~/.talos`, and a `drbdadm` wrapper that `crictl exec`s into the Linstor
-  satellite container. All crictl/containerd endpoints assume the host is mounted at `/host`.
-- The image tag chain: CI tags pushes with `type=sha,format=short` (`sha-<7chars>`),
-  and the plugin queries the GitHub commits API for the latest short SHA on `main` to
-  pick the `ghcr.io/...:sha-<7chars>` tag. The `latest` fallback only fires when the API
-  request fails, not when the tag is missing: running the plugin right after a push to
-  `main`, before CI has finished, fails with an image-pull error. After pushing, wait
-  for the CI build before testing the plugin against that commit.
+- `Dockerfile` — the image: `alpine:3.24.3` base, `TARGETARCH=amd64` default (no
+  platform matrix, so published images are linux/amd64 only), three RUN layers
+  then `COPY`/`ENV`/`ENTRYPOINT`.
+- `bashrc` → `COPY`d to `/root/.bashrc`.
+- `.github/workflows/` — two workflows (below).
+- `README.md` — user-facing docs; keep its "Pre-installed Tooling" list in sync
+  with the Dockerfile.
 
-## Repo naming is coupled across three places
+## Dockerfile structure
 
-The plugin pins its image/tag resolution to one `REPO` variable
-(`next-siderolabs/talos-toolbox`) + branch `main` (GitHub API for the tag, and the
-`ghcr.io/...` image); CI builds `${{ github.repository }}`, and the README documents the
-clone URL. The plugin's API query follows `main` only, even though CI also triggers on
-`master`. If the repo is renamed or the default branch changes, update the script's
-`REPO`, and the README (CI follows the repo automatically).
+- Layer 1: `apk add` — distro-provided tooling (kubectl, helm, sops, age,
+  jq/vim/tmux/aws-cli/debug tools). The weekly cron rebuild keeps apk packages
+  fresh; pin the base tag (`alpine:3.24.x`).
+- Layer 2: a `&&`-chained list of pinned downloads. Two asset patterns coexist:
+  versionless assets (fetch directly, latest-style) and **versioned** assets
+  whose asset names embed the version (`helm`, `helmfile`, `flux`, `sops`, `age`,
+  `just` style — these fetch under `/releases/download/<tag>/...`). Versioned
+  assets unpack to a scratch dir inside the layer (`/tmp`, or a dedicated dir
+  like `/root/.local/share/helm/plugins` for helm plugins); the final `rm -rf`
+  line of the layer removes that scratch content so it never bloats the image.
+  Before writing a download URL, check the upstream release's asset list —
+  asset names differ per project and change over time.
+- Layer 3: writes `/etc/crictl.yaml` pointing at the containerd socket on the
+  **host root mounted at `/host`**, plus symlinks `/var/log/pods` and
+  `/var/log/containers` to `/host`.
+- `COPY bashrc`, `ENV IMAGE_SERVICE_ENDPOINT` + `CONTAINER_RUNTIME_ENDPOINT`
+  (same socket URI), `ENTRYPOINT [ "/bin/bash" ]`.
 
-Branding is unified to `Toolbox` everywhere except the script's launch message (cosmetic
-only). The config dir is `talos-toolbox`
-now; the script keeps a legacy `talos-toolbx` fallback (marked with a `shortcut:`
-comment) — don't remove it until no old installs exist.
+## CI / release flow
 
-## Adding tools to the image
+- `build-push.yaml`: pushes to `main`/`master` build and push to GHCR; weekly
+  cron (`0 3 * * 0`) rebuilds. Published tags: `latest` + `YYYYMMDD` (default
+  branch only) and `sha-<7 chars>` per commit. Its `Verify the merge was
+  reviewed` step (push events only) fails unless the pushed SHA has a passing
+  `review` check-run — so merge → push is the release path; direct pushes skip
+  nothing except when branch protection blocks them.
+- `opencode-review.yml`: OpenCode review on PRs from this repo's branches and
+  `/oc` comments (OWNER/MEMBER/COLLABORATOR). Self-hosted runner group; injects
+  its OpenCode config inline (repo variable `STRATA_BASE_URL`, secret
+  `STRATA_API_KEY`), which overrides any config file in the checkout.
+- Branch protection on `main` (settings, not files) should require the `review`
+  and build checks and restrict direct pushes.
 
-- Check the upstream release asset list (GitHub `/releases/latest` API) before writing a
-  download URL: asset naming differs per repo and often drops the `v` prefix
-  (`helmfile_1.8.2_linux_amd64.tar.gz` with underscores vs `diff-3.15.15-linux-amd64.tgz`
-  with dashes vs `k9s_Linux_amd64.tar.gz`). Pins are v-prefixed; the Dockerfile strips it
-  with `${VAR#v}` inside the URL strings.
-- `kubectl-ko` is not a binary: it is a shell script (arch-independent, needs `chmod`)
-  fetched from `raw.githubusercontent.com/kubeovn/kube-ovn/<tag>/dist/images/kubectl-ko`;
-  its Renovate pin tracks `kubeovn/kube-ovn` releases.
-- helm-diff installs as a helm plugin extracted into `/root/.local/share/helm/plugins`
-  (not a `/usr/local/bin` binary); `helm diff` resolves it from there.
-- `casey/just` is the one pinned repo that does **not** match this pattern: its tags
-  and assets carry no `v` prefix (`1.59.0`, not `v1.59.0`) and the asset name embeds
-  the full version, so pin the version without `v` and hardcode the
-  `x86_64-unknown-linux-musl` triple — fine to hardcode while the image is amd64-only.
-- Keep the README "Pre-installed Tooling" list in sync with the Dockerfile.
+## Conventions
 
-## Renovate conventions
-
-Tool versions are pinned as `ARG *_VERSION` in the Dockerfile, each preceded by a
-`# renovate: datasource=... depName=...` comment. The custom regex manager requires the
-comment line immediately above the `ARG` line — keep them adjacent and in that format
-or Renovate stops tracking the version. Minor/patch bumps automerge, gated on the CI
-build check; majors wait on the dashboard.
-
-## Verifying changes
-
-- Dockerfile changes: `docker build -t talos-toolbox .` is the only local check
-  (needs network to fetch tool tarballs; buildkit passes `TARGETARCH`).
-- Script/bashrc changes: verify with `bash -n <file>` and, if available, `shellcheck`.
-  No automated test exists; behavior only manifests against a real Omni-backed cluster.
-- `opencode.json` is local personal config (a local model provider with an API key).
-  It is currently untracked — keep it out of commits, and remember the CI `review`
-  job ignores it entirely (inline `OPENCODE_CONFIG_CONTENT` wins), so editing it
-  changes nothing for CI.
+- Renovate tracks each tool's version via a `# renovate: datasource=github-releases
+  depName=<owner>/<repo>` comment immediately above each
+  `ARG <NAME>_VERSION` line — keep them adjacent and one per tool.
+- Keep the final in-layer cleanup list (`rm -rf ...`) in sync with wherever new
+  scratch content lands.
+- Verify Dockerfile changes with `docker build -t talos-toolbox .` locally when
+  possible; CI runs the identical build on push.
