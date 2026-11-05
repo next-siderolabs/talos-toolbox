@@ -5,8 +5,12 @@ build tooling. Do not search for a test runner or lint config — they don't exi
 CI reviews then builds: every PR into `main`/`master` from a branch of this repo gets
 an automatic OpenCode review (`.github/workflows/opencode-review.yml`, job `review`;
 fork PRs and on-demand use `/oc` comments; the agent only starts for internal-branch
-PRs or OWNER/MEMBER/COLLABORATOR commenters) and
-a build-only check (`build-push.yaml`). `build-push.yaml` gates main pushes: its
+PRs or OWNER/MEMBER/COLLABORATOR commenters;
+fork PRs from collaborators still skip — see the `shortcut:` comment in the
+workflow) and a build-only check (`build-push.yaml`). The `review` job runs on a
+**self-hosted** runner and injects its OpenCode config inline (repo variable
+`STRATA_BASE_URL`, secret `STRATA_API_KEY`), which overrides any committed config
+file. `build-push.yaml` gates main pushes: its
 `Verify the merge was reviewed` step (push events only) fails the job unless the head
 commit came from a merged PR whose `review` check-run succeeded on the PR head SHA;
 cron and workflow_dispatch rebuilds skip the step. Blocking bad merges outright is a
@@ -64,6 +68,10 @@ comment) — don't remove it until no old installs exist.
   its Renovate pin tracks `kubeovn/kube-ovn` releases.
 - helm-diff installs as a helm plugin extracted into `/root/.local/share/helm/plugins`
   (not a `/usr/local/bin` binary); `helm diff` resolves it from there.
+- `casey/just` is the one pinned repo that does **not** match this pattern: its tags
+  and assets carry no `v` prefix (`1.59.0`, not `v1.59.0`) and the asset name embeds
+  the full version, so pin the version without `v` and hardcode the
+  `x86_64-unknown-linux-musl` triple — fine to hardcode while the image is amd64-only.
 - Keep the README "Pre-installed Tooling" list in sync with the Dockerfile.
 
 ## Renovate conventions
@@ -80,5 +88,7 @@ build check; majors wait on the dashboard.
   (needs network to fetch tool tarballs; buildkit passes `TARGETARCH`).
 - Script/bashrc changes: verify with `bash -n <file>` and, if available, `shellcheck`.
   No automated test exists; behavior only manifests against a real Omni-backed cluster.
-- `opencode.json` is local personal config (a local model provider with an API key);
-  keep it out of commits.
+- `opencode.json` is local personal config (a local model provider with an API key).
+  It is currently untracked — keep it out of commits, and remember the CI `review`
+  job ignores it entirely (inline `OPENCODE_CONFIG_CONTENT` wins), so editing it
+  changes nothing for CI.
