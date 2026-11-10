@@ -1,7 +1,7 @@
 
 # syntax=docker/dockerfile:1
 
-FROM alpine:3.24.3
+FROM alpine:3.24.4
 
 # ============================================================
 # Version pinning
@@ -21,7 +21,7 @@ ARG HELM_VERSION=v4.3.1
 
 # Omni
 # renovate: datasource=github-releases depName=siderolabs/omni
-ARG OMNICTL_VERSION=v1.13.2
+ARG OMNICTL_VERSION=v1.13.3
 
 # Kubernetes utilities
 # renovate: datasource=github-releases depName=derailed/k9s
@@ -42,7 +42,7 @@ ARG OPENSTACKCLIENT_VERSION=10.5.0
 
 # GitOps
 # renovate: datasource=github-releases depName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.2
+ARG HELMFILE_VERSION=v1.8.3
 
 # renovate: datasource=github-releases depName=databus23/helm-diff
 ARG HELM_DIFF_VERSION=v3.15.15
@@ -52,7 +52,7 @@ ARG FLUX_VERSION=v2.10.0
 
 # Networking
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
-ARG KUBE_OVN_VERSION=v1.16.17
+ARG KUBE_OVN_VERSION=v1.16.18
 
 # renovate: datasource=github-releases depName=cilium/cilium-cli
 ARG CILIUM_CLI_VERSION=v0.20.2
