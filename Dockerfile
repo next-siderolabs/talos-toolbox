@@ -383,8 +383,8 @@ RUN set -eux; \
     echo "Toolbox verification completed"
 
 # ============================================================
-# Entrypoint
+# Runtime
 # ============================================================
 
-ENTRYPOINT ["/bin/bash"]
-
+# Keep container alive in detached mode
+CMD ["sleep", "infinity"]
