@@ -44,8 +44,11 @@ Two deliverables in one repo, both named `next-siderolabs/talos-toolbox`:
 
 - amd64 only — the `TARGETARCH` case statement exits on anything else.
 - Each tool has a `# renovate: datasource=... depName=...` comment above its
-  `ARG <NAME>_VERSION`. Renovate bot bumps these automatically; never change
-  a version string without keeping its renovate comment intact.
+  `ARG <NAME>_VERSION`. Renovate's regex manager (renovate.json) matches the
+  comment and the `ARG` line as one unit, so keep the comment as the last line
+  before the `ARG` — any other line between them silently breaks the bump.
+  Renovate bot bumps these automatically; never change a version string
+  without keeping its renovate comment intact.
 - Versions must match upstream release tag names exactly. Several download
   URLs strip the leading `v` (`${X_VERSION#v}`); check the URL pattern
   before assuming a new version will resolve.
