@@ -27,11 +27,12 @@ Two deliverables in one repo, both named `next-siderolabs/talos-toolbox`:
   `.github/workflows/build-push.yaml`: builds on push to main, build-only on
   PRs (the check Renovate automerge waits on), weekly cron (fresh apk
   packages), and manual dispatch.
-- Merging to main is gated: `build-push.yaml` fails if the push is not a
-  merged PR with a passing `review` status check from
-  `opencode-review.yml`. So the flow is always: branch → PR → OpenCode
-  review → merge → image published. Comment `/oc` or `/opencode` on a PR to
-  re-run the review on demand.
+- The review gate in `build-push.yaml` (push to main must come from a merged
+  PR with a passing `review` check) is currently commented out — pushes to
+  main build and publish regardless. The intended flow is still branch → PR
+  → OpenCode review → merge → image published; `opencode-review.yml` still
+  runs the `review` check on every PR, and a `/oc` or `/opencode` comment
+  re-runs it on demand.
 - The review workflow skips fork PRs, so a fork PR can never pass the gate —
   always work on branches of the repo itself.
 - Renovate (config in `renovate.json`) automerges minor/patch/digest/pin bumps
@@ -59,9 +60,11 @@ Two deliverables in one repo, both named `next-siderolabs/talos-toolbox`:
 
 - `bashrc` is baked into the image; edits require a new image publish, not
   just a plugin-script change.
-- The review bot's provider config is injected inline via
-  `OPENCODE_CONFIG_CONTENT` in `opencode-review.yml`, *not* from
-  `opencode.json`. Both `opencode.json` and `.opencode.json` are gitignored
-  personal local-dev config — never commit them.
+- The review bot runs on a self-hosted runner and needs the
+  `STRATA_BASE_URL` repo variable plus `STRATA_API_KEY` secret. Its provider
+  config is injected inline via `OPENCODE_CONFIG_CONTENT` in
+  `opencode-review.yml`, *not* from `opencode.json`. Both `opencode.json` and
+  `.opencode.json` are gitignored personal local-dev config — never commit
+  them.
 - The plugin expects `ghcr.io` to already have the `sha-<hash>` tag; the
   tag only exists after CI finishes building the merge commit.
