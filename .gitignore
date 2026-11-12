@@ -48,3 +48,6 @@ $RECYCLE.BIN/
 .Trash-*
 .nfs*
 .opencode.json
+
+# Personal local-dev OpenCode config (LAN provider keys)
+opencode.json

@@ -61,8 +61,7 @@ Two deliverables in one repo, both named `next-siderolabs/talos-toolbox`:
   just a plugin-script change.
 - The review bot's provider config is injected inline via
   `OPENCODE_CONFIG_CONTENT` in `opencode-review.yml`, *not* from
-  `opencode.json` (tracked, but it is only personal local-dev config with a
-  LAN Strata key — don't add real secrets to it). `.opencode.json` is
-  gitignored — don't commit it.
+  `opencode.json`. Both `opencode.json` and `.opencode.json` are gitignored
+  personal local-dev config — never commit them.
 - The plugin expects `ghcr.io` to already have the `sha-<hash>` tag; the
   tag only exists after CI finishes building the merge commit.
