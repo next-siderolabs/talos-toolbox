@@ -9,7 +9,7 @@ FROM alpine:3.24.4
 
 # Talos
 # renovate: datasource=github-releases depName=siderolabs/talos
-ARG TALOSCTL_VERSION=v1.14.5
+ARG TALOSCTL_VERSION=v1.14.6
 
 # Kubernetes
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
@@ -51,6 +51,8 @@ ARG HELM_DIFF_VERSION=v3.15.15
 ARG FLUX_VERSION=v2.10.0
 
 # Networking
+# shortcut: v1.17 removed dist/images/kubectl-ko (now Go code in cmd/), so
+# stay on the v1.16 line until the install is reworked
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
 ARG KUBE_OVN_VERSION=v1.16.18
 
