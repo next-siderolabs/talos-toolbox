@@ -17,7 +17,7 @@ ARG KUBECTL_VERSION=v1.37.2
 
 # Helm
 # renovate: datasource=github-releases depName=helm/helm
-ARG HELM_VERSION=v4.3.1
+ARG HELM_VERSION=v4.3.2
 
 # Omni
 # renovate: datasource=github-releases depName=siderolabs/omni
@@ -42,7 +42,7 @@ ARG OPENSTACKCLIENT_VERSION=10.5.0
 
 # GitOps
 # renovate: datasource=github-releases depName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.3
+ARG HELMFILE_VERSION=v1.8.4
 
 # renovate: datasource=github-releases depName=databus23/helm-diff
 ARG HELM_DIFF_VERSION=v3.15.15
@@ -54,10 +54,10 @@ ARG FLUX_VERSION=v2.10.0
 # shortcut: v1.17 removed dist/images/kubectl-ko (now Go code in cmd/), so
 # stay on the v1.16 line until the install is reworked
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
-ARG KUBE_OVN_VERSION=v1.16.18
+ARG KUBE_OVN_VERSION=v1.16.19
 
 # renovate: datasource=github-releases depName=cilium/cilium-cli
-ARG CILIUM_CLI_VERSION=v0.20.2
+ARG CILIUM_CLI_VERSION=v0.20.3
 
 # Security
 # renovate: datasource=github-releases depName=getsops/sops
