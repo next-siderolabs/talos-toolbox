@@ -54,7 +54,7 @@ ARG FLUX_VERSION=v2.10.0
 # shortcut: v1.17 removed dist/images/kubectl-ko (now Go code in cmd/), so
 # stay on the v1.16 line until the install is reworked
 # renovate: datasource=github-releases depName=kubeovn/kube-ovn
-ARG KUBE_OVN_VERSION=v1.16.19
+ARG KUBE_OVN_VERSION=v1.16.20
 
 # renovate: datasource=github-releases depName=cilium/cilium-cli
 ARG CILIUM_CLI_VERSION=v0.20.3
