@@ -48,7 +48,7 @@ ARG HELMFILE_VERSION=v1.8.4
 ARG HELM_DIFF_VERSION=v3.15.15
 
 # renovate: datasource=github-releases depName=fluxcd/flux2
-ARG FLUX_VERSION=v2.10.0
+ARG FLUX_VERSION=v2.10.1
 
 # Networking
 # shortcut: v1.17 removed dist/images/kubectl-ko (now Go code in cmd/), so
