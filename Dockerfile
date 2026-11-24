@@ -9,7 +9,7 @@ FROM alpine:3.24.4
 
 # Talos
 # renovate: datasource=github-releases depName=siderolabs/talos
-ARG TALOSCTL_VERSION=v1.14.6
+ARG TALOSCTL_VERSION=v1.14.7
 
 # Kubernetes
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
@@ -21,7 +21,7 @@ ARG HELM_VERSION=v4.3.2
 
 # Omni
 # renovate: datasource=github-releases depName=siderolabs/omni
-ARG OMNICTL_VERSION=v1.13.3
+ARG OMNICTL_VERSION=v1.14.0
 
 # Kubernetes utilities
 # renovate: datasource=github-releases depName=derailed/k9s
@@ -42,13 +42,13 @@ ARG OPENSTACKCLIENT_VERSION=10.5.0
 
 # GitOps
 # renovate: datasource=github-releases depName=helmfile/helmfile
-ARG HELMFILE_VERSION=v1.8.4
+ARG HELMFILE_VERSION=v1.8.5
 
 # renovate: datasource=github-releases depName=databus23/helm-diff
 ARG HELM_DIFF_VERSION=v3.15.15
 
 # renovate: datasource=github-releases depName=fluxcd/flux2
-ARG FLUX_VERSION=v2.10.0
+ARG FLUX_VERSION=v2.10.1
 
 # Networking
 # shortcut: v1.17 removed dist/images/kubectl-ko (now Go code in cmd/), so
