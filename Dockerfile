@@ -13,7 +13,7 @@ ARG TALOSCTL_VERSION=v1.14.7
 
 # Kubernetes
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION=v1.37.2
+ARG KUBECTL_VERSION=v1.37.3
 
 # Helm
 # renovate: datasource=github-releases depName=helm/helm
@@ -38,7 +38,7 @@ ARG KUBELOGIN_VERSION=v1.36.4
 ARG TOPF_VERSION=v0.6.2
 
 # renovate: datasource=pypi depName=python-openstackclient
-ARG OPENSTACKCLIENT_VERSION=10.5.0
+ARG OPENSTACKCLIENT_VERSION=10.6.0
 
 # GitOps
 # renovate: datasource=github-releases depName=helmfile/helmfile
