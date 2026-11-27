@@ -37,6 +37,9 @@ ARG KUBELOGIN_VERSION=v1.36.4
 # renovate: datasource=github-releases depName=postfinance/topf
 ARG TOPF_VERSION=v0.6.2
 
+# renovate: datasource=github-releases depName=vmware/govmomi
+ARG GOVC_VERSION=v0.56.2
+
 # renovate: datasource=pypi depName=python-openstackclient
 ARG OPENSTACKCLIENT_VERSION=10.6.0
 
@@ -219,6 +222,15 @@ RUN set -eux; \
         -C /usr/local/bin topf; \
     \
     echo "========================================"; \
+    echo "Installing govc"; \
+    echo "========================================"; \
+    curl -fSL --retry 3 \
+        "https://github.com/vmware/govmomi/releases/download/${GOVC_VERSION}/govc_Linux_x86_64.tar.gz" \
+        -o /tmp/tool-downloads/govc.tar.gz; \
+    tar -xzf /tmp/tool-downloads/govc.tar.gz \
+        -C /usr/local/bin govc; \
+    \
+    echo "========================================"; \
     echo "Installing helmfile"; \
     echo "========================================"; \
     curl -fSL --retry 3 \
@@ -300,6 +312,7 @@ RUN set -eux; \
         /usr/local/bin/k9s \
         /usr/local/bin/kubectl-oidc_login \
         /usr/local/bin/topf \
+        /usr/local/bin/govc \
         /usr/local/bin/helmfile \
         /usr/local/bin/flux \
         /usr/local/bin/kubectl-ko \
@@ -322,6 +335,7 @@ RUN set -eux; \
         k9s \
         kubectl-oidc_login \
         topf \
+        govc \
         helmfile \
         flux \
         kubectl-ko \
@@ -382,6 +396,7 @@ RUN set -eux; \
     echo "Just:"; just --version; \
     echo "SOPS:"; sops --version; \
     echo "Age:"; age --version; \
+    echo "govc:"; govc version -l; \
     echo "Toolbox verification completed"
 
 # ============================================================
